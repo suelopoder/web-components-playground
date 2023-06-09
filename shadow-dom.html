@@ -1,0 +1,119 @@
+<html>
+
+<head>
+  <script>
+    class GenericButton extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      getColor() {
+        // Must always be hex to use alpha notation later
+        return '#FFFFFF';
+      }
+
+      connectedCallback() {
+        const shadowRoot = this.attachShadow({ mode: "open" });
+        const btn = document.createElement('button');
+        
+        // Forward all none custom attributes to inner button
+        const attrs = this.getAttributeNames();
+        for (let i = 0; i < attrs.length; i++) {
+          const attr = attrs[i]
+          if (attr === 'text') continue;
+
+          const val = this.getAttribute(attr)
+          btn.setAttribute(attr, val)
+        }
+
+        const wrapper = document.createElement('div');
+        shadowRoot.appendChild(wrapper)
+
+        const innerStuff = document.createElement('slot');
+        wrapper.appendChild(innerStuff);
+        
+        btn.textContent = this.getAttribute('text')
+        wrapper.appendChild(btn);
+
+        const style = document.createElement("style");
+
+        style.textContent = `
+        div {
+          display: flex;
+          gap: 1rem;
+          background-color: ${this.getColor()};
+          padding: 10px 16px;
+          border-radius: 8px;
+          box-sizing: border-box;
+          border: 1px solid ${this.getColor()};
+        }
+
+        button {
+          background: none;
+          padding: 0;
+          margin: 0;
+          border: 0;
+          display: block;
+          text-align: center;
+          font-weight: bold;
+          color: #fff;
+          text-decoration: none;
+        }
+
+        div:hover {
+          background-color: ${this.getColor()}CC;
+        }
+        div:active {
+          background-color: ${this.getColor()}BB;
+        }
+        div:disabled {
+          color: #000;
+          background-color: ${this.getColor()}33;
+          cursor: not-allowed;
+        }
+        `
+        shadowRoot.appendChild(style);
+      }
+    }
+
+    class PrimaryButton extends GenericButton {
+      constructor() {
+        super();
+      }
+
+      getColor() {
+        return '#0000FF';
+      }
+    }
+
+    class SecondaryButton extends GenericButton {
+      constructor() {
+        super();
+      }
+
+      getColor() {
+        return '#58cd58';
+      }
+    }
+
+    customElements.define("primary-button", PrimaryButton);
+    customElements.define("secondary-button", SecondaryButton);
+  </script>
+</head>
+
+<body>
+  <h1>Testing custom web components</h1>
+  <p>In this demo we play around web components using shadow DOM. The inner CSS of the component doesn't affect the out-of-the-box browser button. We can pass inner conent that will be rendered within the button. Added a secondary button with class inheritance to test that as well.</p>
+  <div style="display: flex; gap: 1rem;">
+    <primary-button text="Click Me"></primary-button>
+    <secondary-button text="Not Me"></secondary-button>
+    <primary-button disabled text="Click Me"></primary-button>
+    <primary-button text="With emoji">
+      <span>😘</span>
+    </primary-button>
+    <button>Browser button</button>
+  </div>
+  <br />
+</body>
+
+</html>
